@@ -1,61 +1,49 @@
 ERD Diagram
-+----------------+           +-----------------+          +----------------+
-|   Providers    |           |     Orders      |          |   Products     |
-| -------------- |           | ---------------|          | -------------- |
-| id (PK)        |<---+   +->| id (PK)        |+---+  +->| id (PK)        |
-| name           |    |   |  | provider_id(FK)|    |  |  | name           |
-| email          |    |   |  | product_id (FK)|    |  |  | price          |
-| password       |    |   |  | quantity       |    |  |  | ...            |
-| ...            |    |   |  | status         |    |  |  +----------------+
-+----------------+    |   |  | created_at     |    |  |
-                      |   |  +----------------+    |  |
-                      |   |                       |  |
-                      |   |  +------------------+ |  |
-                      |   +--|   Inventory      |<+   |
-                      +------|------------------|-----+
-                             | id (PK)          |
-                             | provider_id (FK) |
-                             | product_id (FK)  |
-                             | quantity         |
-                             +------------------+
++------------------+       +------------------+       +--------------------+
+|   providers      | 1---* |    orders        | *---* |    products        |
+|------------------|       |------------------|       |--------------------|
+| id               |       | id               |       | id                 |
+| name             |       | provider_id      |       | name               |
+| email            |       | total_amount     |       | sku                |
+| clinic_name      |       | status           |       | stock_quantity     |
+| created_at       |       | created_at       |       | created_at         |
++------------------+       +------------------+       +--------------------+
 
-Table Descriptions
-    Providers
-    id (primary key)
-    name
-    email
-    password
-    Other fields (address, etc.)
+       |
+       | 1
+       | 
+       * 
++------------------+
+|    patients      |
+|------------------|
+| id               |
+| provider_id      |
+| name             |
+| email            |
+| surgery_date     |
+| subscription_plan|
+| created_at       |
++------------------+
+High-Level System Explanation
 
-    Products
-    id (primary key)
-    name
-    price
-    Other fields if needed
-    
-    Orders
-    id (primary key)
-    provider_id (foreign key to Providers)
-    product_id (foreign key to Products)
-    quantity
-    status (e.g., pending, fulfilled)
-    created_at
+   * The HSL Labs dashboard connects Providers, Patients, Orders, and Products.
 
-    Inventory
-    id (primary key)
-    provider_id (foreign key to Providers)
-    product_id (foreign key to Products)
-    quantity (units provider has in stock)
-    
-    Explanation
-       - Providers (plastic surgeons) can place Orders for different Products.
-        Each order records which provider placed it, for which product, and in what quantity.
-        An Inventory table tracks how many units of each product each provider currently has, and is updated each time a new order is placed and fulfilled.   
+   * Each Provider manages their own patients and inventory.
+
+   * Orders represent wholesale purchases of products by providers from HSL Labs.
+
+   * When an order is placed, the provider’s inventory updates accordingly.
+
+   * Patients are linked to providers and may have ongoing subscriptions to the product.
+
+   * The dashboard aggregates this data, allowing providers to view sales, stock, and subscription renewals in real time.
+
+   * A background process or event system (queue/job) handles email confirmations and potential payment operations asynchronously.
     ==================================================       
     
 LARAVEL PROJECT STRUCTURE
 
-    app
+ app
 ├── Events
 │   └── OrderPlaced.php
 ├── Http
@@ -93,7 +81,7 @@ routes
 
 tests
 └── Feature
-    └── OrderPlacementTest.php        
+    └── OrderPlacementTest.php
 
 I have organized the Laravel project to separate responsibilities and keep code scalable as the system grows.
 All HTTP request/response logic (controllers and validation requests) are under Http/Controllers and Http/Requests, grouped by domain (here, under Provider/ for provider-only actions).
