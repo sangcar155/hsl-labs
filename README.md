@@ -259,6 +259,8 @@ http://127.0.0.1:8000/dashboard/orders
 You’ll see a list view showing:
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/73fb14e0-bed1-42b7-a28b-51c0b693b89a" />
 
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/4ba9b0e0-2117-4b13-9c68-67340dfa9c8c" />
+
 Provider name
 
 Inventory item
