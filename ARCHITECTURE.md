@@ -42,46 +42,117 @@ High-Level System Explanation
     ==================================================       
     
 LARAVEL PROJECT STRUCTURE
-
- app
-├── Events
-│   └── OrderPlaced.php
-├── Http
-│   ├── Controllers
-│   │   └── Provider
-│   │       └── OrderController.php
-│   ├── Requests
-│   │   └── StoreOrderRequest.php
-│   └── Middleware
-├── Models
-│   ├── Provider.php
-│   ├── Product.php
-│   ├── Order.php
-│   └── Inventory.php
-├── Policies
-│   └── OrderPolicy.php
-├── Services
-│   └── OrderService.php
-├── Listeners
-│   └── SendOrderConfirmation.php
-
-database
-├── migrations
-│   ├── xxxx_xx_xx_create_providers_table.php
-│   ├── xxxx_xx_xx_create_products_table.php
-│   ├── xxxx_xx_xx_create_orders_table.php
-│   └── xxxx_xx_xx_create_inventory_table.php
-└── seeders
-    ├── ProviderSeeder.php
-    ├── ProductSeeder.php
-    └── OrderSeeder.php
-
-routes
-└── web.php
-
-tests
-└── Feature
-    └── OrderPlacementTest.php
+hsl-labs/
+│
+├── app/
+│   ├── Console/
+│   ├── Exceptions/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── DashboardController.php
+│   │   │   ├── ProviderController.php
+│   │   │   ├── OrderController.php
+│   │   │   ├── InventoryController.php
+│   │   │   ├── PatientController.php
+│   │   │   └── SubscriptionController.php
+│   │   ├── Middleware/
+│   │   └── Requests/
+│   │       ├── OrderRequest.php
+│   │       └── InventoryRequest.php
+│   │
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Provider.php
+│   │   ├── Patient.php
+│   │   ├── Inventory.php
+│   │   ├── Order.php
+│   │   └── Subscription.php
+│   │
+│   ├── Policies/
+│   │   └── OrderPolicy.php
+│   │
+│   ├── Services/
+│   │   ├── OrderService.php
+│   │   ├── InventoryService.php
+│   │   └── NotificationService.php
+│   │
+│   ├── Events/
+│   │   └── OrderPlaced.php
+│   │
+│   ├── Listeners/
+│   │   └── SendOrderConfirmation.php
+│   │
+│   ├── Providers/
+│   │   └── AppServiceProvider.php
+│   │
+│   └── Traits/
+│       └── HandlesInventory.php
+│
+├── bootstrap/
+│   └── app.php
+│
+├── config/
+│   ├── app.php
+│   ├── database.php
+│   └── mail.php
+│
+├── database/
+│   ├── factories/
+│   ├── migrations/
+│   │   ├── 2025_10_24_000000_create_providers_table.php
+│   │   ├── 2025_10_24_000001_create_patients_table.php
+│   │   ├── 2025_10_24_000002_create_inventories_table.php
+│   │   ├── 2025_10_24_000003_create_orders_table.php
+│   │   └── 2025_10_24_000004_create_subscriptions_table.php
+│   └── seeders/
+│       ├── DatabaseSeeder.php
+│       ├── ProviderSeeder.php
+│       ├── PatientSeeder.php
+│       ├── InventorySeeder.php
+│       ├── OrderSeeder.php
+│       ├── SubscriptionSeeder.php
+│       └── UserSeeder.php
+│
+├── public/
+│   ├── index.php
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── resources/
+│   ├── views/
+│   │   ├── layouts/
+│   │   │   └── app.blade.php
+│   │   ├── dashboard/
+│   │   │   ├── home.blade.php
+│   │   │   ├── orders.blade.php
+│   │   │   ├── inventory.blade.php
+│   │   │   └── patients.blade.php
+│   │   └── auth/
+│   │       ├── login.blade.php
+│   │       └── register.blade.php
+│   ├── css/
+│   └── js/
+│
+├── routes/
+│   ├── web.php
+│   └── api.php
+│
+├── tests/
+│   ├── Feature/
+│   │   └── ProviderOrderTest.php
+│   └── Unit/
+│       └── OrderServiceTest.php
+│
+├── .env
+├── .gitignore
+├── artisan
+├── composer.json
+├── package.json
+├── phpunit.xml
+├── README.md
+├── PLAN.md
+└── ARCHITECTURE.md
 
 I have organized the Laravel project to separate responsibilities and keep code scalable as the system grows.
 All HTTP request/response logic (controllers and validation requests) are under Http/Controllers and Http/Requests, grouped by domain (here, under Provider/ for provider-only actions).

@@ -10,12 +10,13 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'order_number',
+   protected $fillable = [
         'provider_id',
-        'total_amount',
+        'patient_id',
+        'inventory_id',   // ✅ make sure this is here
+        'quantity',
+        'total',
         'status',
-        'notes',
     ];
 
     // ✅ Each order belongs to one provider

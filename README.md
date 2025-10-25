@@ -1,102 +1,313 @@
+# HSL Labs – Provider Dashboard (Laravel Prototype)
 
- 1) create project folder and initialize git
-    mkdir hsl-labs && cd hsl-labs
-    git init
+A minimal Laravel application that lets Licensed Providers manage product orders, inventory, and patient subscriptions.  
+See [PLAN.md](./PLAN.md) for scope & milestones and [ARCHITECTURE.md](./ARCHITECTURE.md) for the high‑level design.
 
- 2) Install dependency - create a new Laravel app 
-    composer create-project laravel/laravel hsl-labs
-    npm install
-    npm run dev
+A minimal Laravel application that lets Licensed Providers manage product orders, inventory, and patient subscriptions.
 
- 3) basic setup
-    cp .env.example .env
-    php artisan key:generate
+See:
 
- 4) create required top-level docs and folders for the assignment
-    touch PLAN.md ARCHITECTURE.md README.md
-    mkdir -p database/seeders tests/Feature app/Services app/Actions app/Policies
+PLAN.md
+ → project scope & milestones
 
- 5) make an initial commit
-    git add .
-    git commit -m "chore: initial Laravel skeleton + assignment docs"
-6) Configure database connection
+ARCHITECTURE.md
+ → high-level design
 
-    Open the .env file and update your database settings — use MySQL or SQLite as preferred:
+ Prerequisites
 
-    For MySQL:
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=hsl_labs
-    DB_USERNAME=root
-    DB_PASSWORD=
-    Then clear and cache your config:
-    php artisan config:clear
-    php artisan config:cache
+Make sure you have:
 
- 7. Providers table
-    php artisan make:migration create_providers_table --create=providers
+PHP 8.1+
 
-     Patients table
-    php artisan make:migration create_patients_table --create=patients
+Composer (latest)
 
-     Inventories table
-    php artisan make:migration create_inventories_table --create=inventories
+Node.js & NPM – only if you plan to compile frontend assets
 
-     Orders table
-    php artisan make:migration create_orders_table --create=orders
+MySQL or SQLite for database
 
-     Subscriptions table
-    php artisan make:migration create_subscriptions_table --create=subscriptions
+Git
 
-    Run migrations
-    php artisan migrate
+Installation
+1 Create the project folder & initialize Git
+mkdir hsl-labs && cd hsl-labs
+git init
 
-     (Optional) Rerun migrations if needed
-     php artisan migrate:fresh --seed
+2 Scaffold a fresh Laravel app
+composer create-project laravel/laravel .
 
-8.Generate Seeder Files
+3 Install frontend dependencies (optional)
+npm install && npm run dev
 
-    Run these commands in your terminal:
-
-    php artisan make:seeder ProviderSeeder
-    php artisan make:seeder PatientSeeder
-    php artisan make:seeder InventorySeeder
-    php artisan make:seeder OrderSeeder
-    php artisan make:seeder SubscriptionSeeder
-    php artisan make:seeder UserSeeder
-
-9. Pre-fill tables with sample/fake data:
-
-    Providers
-
-    php artisan db:seed --class=ProviderSeeder
+4 Prepare the environment file
+cp .env.example .env
+php artisan key:generate
 
 
-    Patients
+Then edit .env and set your database credentials:
 
-    php artisan db:seed --class=PatientSeeder
-
-
-    Inventory
-
-    php artisan db:seed --class=InventorySeeder
-
-9. Start the development server
-    php artisan serve
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hsl_labs
+DB_USERNAME=root
+DB_PASSWORD=
 
 
-    Open your browser and go to http://localhost:8000.
+Finally, clear & cache configuration:
 
-    Optional Commands
+php artisan config:clear
+php artisan config:cache
 
-    Clear cache:
+ Database Setup & Seeders
+Create Migrations
+php artisan make:migration create_providers_table --create=providers
+php artisan make:migration create_patients_table --create=patients
+php artisan make:migration create_inventories_table --create=inventories
+php artisan make:migration create_orders_table --create=orders
+php artisan make:migration create_subscriptions_table --create=subscriptions
 
-    php artisan cache:clear
-    php artisan config:clear
-    php artisan route:clear
+
+Run migrations:
+
+php artisan migrate
+
+(Optional) Fresh start with seeders
+php artisan migrate:fresh --seed
 
 
-    Run all seeders at once:
+Create seeders:
 
-    php artisan db:seed
+php artisan make:seeder ProviderSeeder
+php artisan make:seeder PatientSeeder
+php artisan make:seeder InventorySeeder
+php artisan make:seeder OrderSeeder
+php artisan make:seeder SubscriptionSeeder
+php artisan make:seeder UserSeeder
+
+
+Run a specific seeder:
+
+php artisan db:seed --class=ProviderSeeder
+
+
+Or run all seeders:
+
+php artisan db:seed
+
+ Running the Vertical Slice
+
+Scenario: Provider places a wholesale product order
+
+Start the development server
+php artisan serve
+
+The app uses Laravel Policies to handle authorization logic.
+Policies ensure that only specific user roles (e.g., provider) can perform certain actions such as creating or viewing orders.
+
+Implementation Summary
+
+Created OrderPolicy using:
+
+php artisan make:policy OrderPolicy --model=Order
+
+
+Registered it in app/Providers/AuthServiceProvider.php
+
+Used inside OrderController with:
+
+$this->authorize('create', Order::class);
+
+
+Only users with the role provider can create new orders.
+
+Files Involved
+
+app/Policies/OrderPolicy.php
+
+app/Providers/AuthServiceProvider.php
+
+app/Http/Controllers/OrderController.php
+
+
+
+Policy → Controls user permissions (authorization)
+
+
+
+http://localhost:8000/providers/orders
+
+
+Fill in product/order details.
+
+Submit the form.
+
+The system:
+
+Creates the order
+
+Decrements inventory
+
+Fires an OrderPlaced event
+Event / Listener (Email Notification)
+
+The project uses Laravel Events and Listeners to handle side effects such as sending emails when an order is placed.
+This keeps the controller and service layers clean and focused on business logic.
+
+Implementation Summary
+
+Generated event and listener:
+
+php artisan make:event OrderPlaced
+php artisan make:listener SendOrderConfirmationEmail --event=OrderPlaced
+
+The event (OrderPlaced) is fired after an order is successfully created.
+
+The listener (SendOrderConfirmationEmail) sends a confirmation email to the provider.
+
+The event–listener pair is registered in EventServiceProvider.
+
+Files Involved
+
+app/Events/OrderPlaced.php
+
+app/Listeners/SendOrderConfirmationEmail.php
+
+app/Providers/EventServiceProvider.php
+
+app/Mail/OrderPlacedMail.php (for email template)
+
+Trigger
+
+The event is triggered inside OrderService:
+
+event(new \App\Events\OrderPlaced($order));
+Returns a JSON confirmation
+
+Example JSON response:
+
+{
+  "message": "Order placed successfully!",
+  "order": {
+    "provider_id": 1,
+    "inventory_id": 1,
+    "patient_id": 1,
+    "quantity": 2
+  }
+}
+
+Testing with Postman (API Endpoint)
+
+Endpoint:
+
+POST http://127.0.0.1:8000/api/orders
+
+
+Request Body:
+
+{
+  "provider_id": 1,
+  "inventory_id": 1,
+  "patient_id": 1,
+  "quantity": 2
+}
+
+
+Response (201 Created):
+
+{  "message": "Order placed successfully!",
+  "data": {
+    "provider_id": 1,
+    "inventory_id": 1,
+    "patient_id": 1,
+    "quantity": 2
+  }
+}{
+    "message": "Order placed successfully!",
+    "data": {
+        "provider_id": 1,
+        "patient_id": 1,
+        "inventory_id": 1,
+        "quantity": 2,
+        "total": 255.42,
+        "status": "confirmed",
+        "updated_at": "2025-10-25T11:48:26.000000Z",
+        "created_at": "2025-10-25T11:48:26.000000Z",
+        "id": 13,
+        "provider": {
+            "id": 1,
+            "name": "Katrine Pagac V",
+            "email": "georgianna93@example.net",
+            "clinic_name": "Mosciski, Torphy and Carroll",
+            "created_at": "2025-10-25T01:38:08.000000Z",
+            "updated_at": "2025-10-25T01:38:08.000000Z"
+        },
+        "inventory": {
+            "id": 1,
+            "product_name": "culpa",
+            "quantity": 42,
+            "price": "127.71",
+            "created_at": "2025-10-25T02:10:08.000000Z",
+            "updated_at": "2025-10-25T11:48:26.000000Z"
+        },
+        "patient": {
+            "id": 1,
+            "name": "Jeromy Kassulke II",
+            "email": "ziemann.chelsea@example.org",
+            "phone": "254.948.6794",
+            "created_at": "2025-10-25T02:24:05.000000Z",
+            "updated_at": "2025-10-25T02:24:05.000000Z"
+        }
+    }
+}
+
+ Dashboard View
+
+Once orders are created, view them in the browser:
+
+http://127.0.0.1:8000/dashboard/orders
+
+
+You’ll see a list view showing:
+
+Provider name
+
+Inventory item
+
+Quantity
+
+Total
+
+Status
+
+ Example – Orders Dashboard View:
+
+Running Automated Tests
+
+Run all tests:
+
+php artisan test
+
+
+Run only order-related tests:
+
+php artisan test --filter=ProviderOrderTest
+
+
+ Tests included:
+
+Successful order placement reduces inventory
+
+Ordering more than available stock triggers validation error
+
+Utility Commands
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+
+ Further Reading
+
+PLAN.md
+ — concise project plan & milestones
+
+ARCHITECTURE.md
+ — high-level architecture diagram

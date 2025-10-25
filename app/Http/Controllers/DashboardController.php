@@ -30,12 +30,14 @@ class DashboardController extends Controller
     }
     public function storeOrder(Request $request, \App\Services\OrderService $orderService)
     {
+       $this->authorize('create', Order::class);
         $validated = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'patient_id' => 'required|exists:patients,id',
             'inventory_id' => 'required|exists:inventories,id',
             'quantity' => 'required|integer|min:1',
         ]);
+
          $order = $orderService->createOrder($validated);
         return redirect()->back()->with('success', 'Order placed successfully!');
     }
