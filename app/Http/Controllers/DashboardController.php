@@ -30,7 +30,7 @@ class DashboardController extends Controller
     }
     public function storeOrder(Request $request, \App\Services\OrderService $orderService)
     {
-       $this->authorize('create', Order::class);
+       //$this->authorize('create', Order::class);
         $validated = $request->validate([
             'provider_id' => 'required|exists:providers,id',
             'patient_id' => 'required|exists:patients,id',
