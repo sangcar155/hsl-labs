@@ -261,6 +261,8 @@ You’ll see a list view showing:
 
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/4ba9b0e0-2117-4b13-9c68-67340dfa9c8c" />
 
+<img width="959" height="629" alt="image" src="https://github.com/user-attachments/assets/b4f64a49-1678-4338-8ae9-5310b7d33a76" />
+
 Provider name
 
 Inventory item
