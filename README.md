@@ -128,15 +128,6 @@ app/Providers/AuthServiceProvider.php
 
 app/Http/Controllers/OrderController.php
 
-
-
-Policy → Controls user permissions (authorization)
-
-
-
-http://localhost:8000/providers/orders
-
-
 Fill in product/order details.
 
 Submit the form.
@@ -259,15 +250,14 @@ Response (201 Created):
         }
     }
 }
-
- Dashboard View
-
+Dashboard View
 Once orders are created, view them in the browser:
 
 http://127.0.0.1:8000/dashboard/orders
 
 
 You’ll see a list view showing:
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/73fb14e0-bed1-42b7-a28b-51c0b693b89a" />
 
 Provider name
 
@@ -293,7 +283,7 @@ Run only order-related tests:
 php artisan test --filter=ProviderOrderTest
 
 
- Tests included:
+Tests included:
 
 Successful order placement reduces inventory
 
@@ -304,7 +294,7 @@ php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
 
- Further Reading
+Further Reading
 
 PLAN.md
  — concise project plan & milestones
