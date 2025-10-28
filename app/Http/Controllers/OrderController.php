@@ -24,19 +24,22 @@ class OrderController extends Controller
 
     public function store(OrderRequest $request): JsonResponse
     {
-        // basic inline authorization: ensure caller is a provider.
-        // If you have auth, use $request->user() and roles.
-        // For now, we rely on provider_id being passed and seeded data.
         $payload = $request->validated();
 
         try {
             $order = $this->orderService->createOrder($payload);
+
             return response()->json([
                 'message' => 'Order placed successfully!',
                 'data' => $order
             ], 201);
+
+        } catch (InsufficientStockException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 409);
         } catch (\Exception $e) {
-            // return 400 for business errors, 500 otherwise
+            // Keep generic error for unexpected issues
             return response()->json([
                 'message' => $e->getMessage()
             ], 500);

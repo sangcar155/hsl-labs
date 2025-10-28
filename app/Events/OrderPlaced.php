@@ -5,12 +5,13 @@ namespace App\Events;
 use App\Models\Order;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\InteractsWithSockets;
 
-class OrderCreated
+class OrderPlaced
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $order;
+    public Order $order;
 
     /**
      * Create a new event instance.
