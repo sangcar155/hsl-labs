@@ -4,6 +4,13 @@
 @if(session('success'))
     <div class="alert alert-success">{{ session('success') }}</div>
 @endif
+@if ($errors->any())
+    <div class="alert alert-danger">
+        @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+        @endforeach
+    </div>
+@endif
 
 <form action="{{ route('dashboard.order.store') }}" method="POST" class="mb-4">
     @csrf
@@ -34,7 +41,15 @@
         </div>
         <div class="col">
             <label>Quantity</label>
-            <input type="number" name="quantity" min="1" class="form-control" required>
+           <input type="number" 
+       name="quantity" 
+       class="form-control @error('quantity') is-invalid @enderror"
+       value="{{ old('quantity') }}">
+
+@error('quantity')
+    <div class="invalid-feedback">{{ $message }}</div>
+@enderror
+
         </div>
     </div>
     <button type="submit" class="btn btn-primary mt-2">Place Order</button>

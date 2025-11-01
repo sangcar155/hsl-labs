@@ -7,9 +7,18 @@ use App\Models\Order;
 use App\Models\Inventory;
 use App\Models\Provider;
 use App\Models\Patient;
-
+use App\Exceptions\InsufficientStockException;
+use App\Http\Requests\OrderRequest;
+use App\Services\OrderService;
 class DashboardController extends Controller
 {
+    protected OrderService $orderService;
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+
     public function index()
     {
         $orders = Order::with(['provider', 'patient', 'inventory'])->get();
@@ -28,18 +37,32 @@ class DashboardController extends Controller
         $patients = Patient::all();
         return view('dashboard.orders', compact('orders', 'inventories', 'providers', 'patients'));
     }
-    public function storeOrder(Request $request, \App\Services\OrderService $orderService)
-    {
-       //$this->authorize('create', Order::class);
-        $validated = $request->validate([
-            'provider_id' => 'required|exists:providers,id',
-            'patient_id' => 'required|exists:patients,id',
-            'inventory_id' => 'required|exists:inventories,id',
-            'quantity' => 'required|integer|min:1',
-        ]);
+   public function store(OrderRequest $request)
+{
+    $payload = $request->validated();
 
-         $order = $orderService->createOrder($validated);
-        return redirect()->back()->with('success', 'Order placed successfully!');
+    try {
+        $this->orderService->createOrder($payload);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Order placed successfully!');
+
+    } catch (InsufficientStockException $e) {
+
+        return redirect()
+            ->back()
+            ->withErrors(['quantity' => $e->getMessage()])
+            ->withInput();
+
+    } catch (\Exception $e) {
+
+        return redirect()
+            ->back()
+            ->withErrors(['error' => 'Something went wrong. Please try again later.'])
+            ->withInput();
     }
+}
+
 
 }

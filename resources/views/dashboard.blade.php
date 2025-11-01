@@ -48,10 +48,7 @@
         <h4 class="text-center py-3">Provider Dashboard</h4>
         <a href="{{ route('dashboard.home') }}">Dashboard Home</a>
         <a href="{{ route('dashboard.orders') }}">Orders</a>
-        <a href="{{ route('dashboard.products') }}">Inventory</a>
-        <a href="{{ route('dashboard.subscriptions') }}">Subscriptions</a>
-        <a href="{{ route('dashboard.reports') }}">Reports</a>
-        <a href="{{ route('dashboard.profile') }}">Profile</a>
+
     </div>
 
     <!-- Main content -->
