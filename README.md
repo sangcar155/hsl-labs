@@ -278,7 +278,7 @@ Status
 Running Automated Tests
 
 Run all tests:
-
+![alt text](image-2.png)
 php artisan test
 
 
@@ -290,6 +290,34 @@ php artisan test --filter=ProviderOrderTest
 Tests included:
 
 Successful order placement reduces inventory
+POST /login
+email: provider@example.com
+password: password
+ Order Creation Feature Test
+
+This project includes a feature test to verify that a Provider can successfully place an order and that inventory levels update correctly.
+
+ Test Covered: `tests/Feature/OrderCreationTest.php`
+
+What the test asserts:
+
+- A Provider (authenticated through their linked User account) can create an order.
+- The order is stored in the database.
+- Inventory quantity is reduced correctly.
+- The `OrderPlaced` event is dispatched.
+- The entire process is wrapped in a database transaction with `lockForUpdate()` to prevent race conditions.
+
+ Run the Test
+
+bash
+php artisan test --filter=OrderCreationTest
+This confirms:
+
+Concurrency safety is enforced
+
+Business logic in OrderService works correctly
+
+HTTP API responds with 201 Created on success
 
 Ordering more than available stock triggers validation error
 

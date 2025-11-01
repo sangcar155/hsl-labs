@@ -8,22 +8,14 @@ use Faker\Factory as Faker;
 
 class ProviderSeeder extends Seeder
 {
-    public function run(): void
-    {
-        $faker = Faker::create();
+   public function run(): void
+{
+    // Create 10 providers, each with a linked user
+    \App\Models\Provider::factory()
+        ->count(10)
+        ->create();
 
-        // Insert 10 fake providers
-        foreach (range(1, 10) as $i) {
-            DB::table('providers')->insert([
-                'name' => $faker->name,
-                'email' => $faker->unique()->safeEmail,
-                'clinic_name' => $faker->company,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
+    $this->command->info('✅ 10 Providers inserted successfully!');
+}
 
-        // confirmation in console
-        $this->command->info('✅ 10 Providers inserted successfully!');
-    }
 }

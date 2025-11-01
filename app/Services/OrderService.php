@@ -7,6 +7,8 @@ use App\Models\Inventory;
 use App\Events\OrderPlaced;
 use App\Exceptions\InsufficientStockException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+
 use Exception;
 
 class OrderService
@@ -60,8 +62,8 @@ class OrderService
             $order->load(['provider', 'inventory', 'patient']);
 
             // Fire event (you can also dispatch after commit if preferred)
-            event(new OrderPlaced($order));
-
+          //  event(new OrderPlaced($order));
+          event(new OrderPlaced($order));
             return $order;
         });
     }
