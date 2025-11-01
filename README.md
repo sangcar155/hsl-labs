@@ -39,6 +39,7 @@ cp .env.example .env
 php artisan key:generate
 
 Configure database in .env
+php artisan migrate --seed
 
 Then edit .env and set your database credentials:
 
