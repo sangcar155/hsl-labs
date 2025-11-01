@@ -320,7 +320,9 @@ Business logic in OrderService works correctly
 HTTP API responds with 201 Created on success
 
 Ordering more than available stock triggers validation error
-
+![alt text](image-5.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
 Utility Commands
 php artisan cache:clear
 php artisan config:clear

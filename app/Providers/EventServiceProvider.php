@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
-use App\Events\OrderCreated;
-use App\Listeners\SendOrderConfirmation;
+use App\Events\OrderPlaced;
+use App\Listeners\SendOrderConfirmationEmail;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -13,9 +13,9 @@ class EventServiceProvider extends ServiceProvider
      * The event listener mappings for the application.
      */
     protected $listen = [
-        OrderCreated::class => [
-            SendOrderConfirmation::class,
-        ],
+         OrderPlaced::class => [
+        SendOrderConfirmationEmail::class,
+    ],
     ];
 
     /**

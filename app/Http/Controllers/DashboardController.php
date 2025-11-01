@@ -37,8 +37,8 @@ class DashboardController extends Controller
         $patients = Patient::all();
         return view('dashboard.orders', compact('orders', 'inventories', 'providers', 'patients'));
     }
-   public function store(OrderRequest $request)
-{
+    public function store(OrderRequest $request)
+    {
     $payload = $request->validated();
 
     try {
@@ -62,7 +62,7 @@ class DashboardController extends Controller
             ->withErrors(['error' => 'Something went wrong. Please try again later.'])
             ->withInput();
     }
-}
+    }
 
 
 }
