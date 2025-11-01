@@ -1,47 +1,44 @@
-# HSL Labs – Provider Dashboard (Laravel Prototype)
+ HSL Labs – Provider Order Management (Laravel Project)
 
-A minimal Laravel application that lets Licensed Providers manage product orders, inventory, and patient subscriptions.  
-See [PLAN.md](./PLAN.md) for scope & milestones and [ARCHITECTURE.md](./ARCHITECTURE.md) for the high‑level design.
+This project is a Laravel-based application used byLicensed Providers (Plastic Surgeons) to order nutritional supplement products for their patients. 
 
-A minimal Laravel application that lets Licensed Providers manage product orders, inventory, and patient subscriptions.
+It demonstrates:
 
-See:
+- Cleanservice-layer architecture
+-Authorization using Laravel Policies
+-Event → Listener workflow for email notifications
+-Inventory concurrency safety usingDB::transaction() andlockForUpdate()
+-Feature test coverage for critical order flows
 
-PLAN.md
- → project scope & milestones
+***************************************************
+Requirements
 
-ARCHITECTURE.md
- → high-level design
+Before installing, ensure you have the following:
 
- Prerequisites
+| Tool | Version |
+|------|---------|
+| PHP 8.1+ | Required |
+| Composer | Latest |
+| MySQL or SQLite | Any |
+| Node.js + NPM | Only if compiling front-end assets |
+| Git | For version control |
 
-Make sure you have:
+******************************************************
 
-PHP 8.1+
+Installation Setup
 
-Composer (latest)
+Clone project (or create new folder and init Git)
+git clone <your-repo-url> hsl-labs
+cd hsl-labs
 
-Node.js & NPM – only if you plan to compile frontend assets
+Install dependencies
+composer install
 
-MySQL or SQLite for database
-
-Git
-
-Installation
-1 Create the project folder & initialize Git
-mkdir hsl-labs && cd hsl-labs
-git init
-
-2 Scaffold a fresh Laravel app
-composer create-project laravel/laravel .
-
-3 Install frontend dependencies (optional)
-npm install && npm run dev
-
-4 Prepare the environment file
+Setup environment
 cp .env.example .env
 php artisan key:generate
 
+Configure database in .env
 
 Then edit .env and set your database credentials:
 
@@ -52,13 +49,7 @@ DB_DATABASE=hsl_labs
 DB_USERNAME=root
 DB_PASSWORD=
 
-
-Finally, clear & cache configuration:
-
-php artisan config:clear
-php artisan config:cache
-
- Database Setup & Seeders
+Database Setup & Seeders
 Create Migrations
 php artisan make:migration create_providers_table --create=providers
 php artisan make:migration create_patients_table --create=patients
@@ -69,148 +60,69 @@ php artisan make:migration create_subscriptions_table --create=subscriptions
 
 Run migrations:
 
+
+Finally, clear & cache configuration:
+
+php artisan config:clear
+php artisan config:cache
+
+
+| Table | Purpose |
+|-------|---------|
+|users | Stores login accounts for providers & staff |
+|providers | Profile data for Licensed Providers (clinics) |
+|patients | Patients who receive products |
+|inventories | Product stock + pricing |
+|orders | Provider product purchase orders |
+Running Migrations
 php artisan migrate
 
-(Optional) Fresh start with seeders
-php artisan migrate:fresh --seed
+******************************************************
+Reset DB & Seed Demo Data
 
+---
 
-Create seeders:
+Domain Flow Summary
 
-php artisan make:seeder ProviderSeeder
-php artisan make:seeder PatientSeeder
-php artisan make:seeder InventorySeeder
-php artisan make:seeder OrderSeeder
-php artisan make:seeder SubscriptionSeeder
-php artisan make:seeder UserSeeder
+Business Flow Summary
 
+1. A Provider logs in (each provider has a connectedUser account).
+2. The provider selects a product from Inventory.
+3. They place an Order for a patient.
+4. The system:
+   - Validates input viaStoreOrderRequest
+   - Checks stock withlockForUpdate() for concurrency safety
+   - Creates the Order inside a DB transaction
+   - Decrements product inventory
+   - FiresOrderPlaced event
+   - Listener sends confirmation email to provider
 
-Run a specific seeder:
+******************************************************
 
-php artisan db:seed --class=ProviderSeeder
+API Endpoint: Create Order
 
+POST/api/orders
 
-Or run all seeders:
+Request Body
 
-php artisan db:seed
-
- Running the Vertical Slice
-
-Scenario: Provider places a wholesale product order
-
-Start the development server
-php artisan serve
-
-The app uses Laravel Policies to handle authorization logic.
-Policies ensure that only specific user roles (e.g., provider) can perform certain actions such as creating or viewing orders.
-
-Implementation Summary
-
-Created OrderPolicy using:
-
-php artisan make:policy OrderPolicy --model=Order
-
-
-Registered it in app/Providers/AuthServiceProvider.php
-
-Used inside OrderController with:
-
-$this->authorize('create', Order::class);
-
-
-Only users with the role provider can create new orders.
-
-Files Involved
-
-app/Policies/OrderPolicy.php
-
-app/Providers/AuthServiceProvider.php
-
-app/Http/Controllers/OrderController.php
-
-Fill in product/order details.
-
-Submit the form.
-
-The system:
-
-Creates the order
-
-Decrements inventory
-
-Fires an OrderPlaced event
-Event / Listener (Email Notification)
-
-The project uses Laravel Events and Listeners to handle side effects such as sending emails when an order is placed.
-This keeps the controller and service layers clean and focused on business logic.
-
-Implementation Summary
-
-Generated event and listener:
-
-php artisan make:event OrderPlaced
-php artisan make:listener SendOrderConfirmationEmail --event=OrderPlaced
-
-The event (OrderPlaced) is fired after an order is successfully created.
-
-The listener (SendOrderConfirmationEmail) sends a confirmation email to the provider.
-
-The event–listener pair is registered in EventServiceProvider.
-
-Files Involved
-
-app/Events/OrderPlaced.php
-
-app/Listeners/SendOrderConfirmationEmail.php
-
-app/Providers/EventServiceProvider.php
-
-app/Mail/OrderPlacedMail.php (for email template)
-
-Trigger
-
-The event is triggered inside OrderService:
-
-event(new \App\Events\OrderPlaced($order));
-Returns a JSON confirmation
-
-Example JSON response:
-
-{
-  "message": "Order placed successfully!",
-  "order": {
-    "provider_id": 1,
-    "inventory_id": 1,
-    "patient_id": 1,
-    "quantity": 2
-  }
-}
-
-Testing with Postman (API Endpoint)
-
-Endpoint:
-
-POST http://127.0.0.1:8000/api/orders
-
-
-Request Body:
-
+json
 {
   "provider_id": 1,
   "inventory_id": 1,
   "patient_id": 1,
   "quantity": 2
 }
-
-
-Response (201 Created):
-
-{  "message": "Order placed successfully!",
+Response
+{
+  "message": "Order placed successfully!",
   "data": {
+    "id": 42,
     "provider_id": 1,
     "inventory_id": 1,
     "patient_id": 1,
-    "quantity": 2
+    "quantity": 2,
+    "total": 200,
+    "status": "confirmed"
   }
 }{
     "message": "Order placed successfully!",
@@ -250,74 +162,102 @@ Response (201 Created):
         }
     }
 }
-Dashboard View
-Once orders are created, view them in the browser:
 
-http://127.0.0.1:8000/dashboard/orders
+******************************************************
+Authorization (Policies)
+Authorization (Provider-Only Access)
+
+Order creation is protected using Laravel Policies.
+
+Only users withrole = 'provider' are allowed to create orders.
+
+-OrderPolicy.php defines the rules.
+- Controller callsauthorize('create', Order::class) to enforce them.
+
+******************************************************
+Order Service (Business Logic)
+
+Order creation is handled inapp/Services/OrderService.php using:
+
+-DB::transaction() for atomic execution
+-lockForUpdate() to prevent race-condition stock issues
+- Automatic inventory decrement
+- Event dispatch (OrderPlaced)
 
 
-You’ll see a list view showing:
-<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/73fb14e0-bed1-42b7-a28b-51c0b693b89a" />
 
-<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/4ba9b0e0-2117-4b13-9c68-67340dfa9c8c" />
+******************************************************
+Event → Listener → Email
 
-<img width="959" height="629" alt="image" src="https://github.com/user-attachments/assets/b4f64a49-1678-4338-8ae9-5310b7d33a76" />
+| Component | Purpose |
+|----------|---------|
+| OrderPlaced | Fired when order is successfully created |
+| SendOrderConfirmationEmail | Sends provider confirmation email |
+| OrderConfirmationMail | Email template |
 
-Provider name
-
-Inventory item
-
-Quantity
-
-Total
-
-Status
-
- Example – Orders Dashboard View:
-
-Running Automated Tests
+This keeps controllers and services clean, and moves side-effects into event listeners.
+Automated Tests
 
 Run all tests:
-![alt text](image-2.png)
+
 php artisan test
 
+![alt text](image-6.png)
 
-Run only order-related tests:
+ Continuous Integration (GitHub Actions)
 
-php artisan test --filter=ProviderOrderTest
+This project includes automated tests that run on every push and pull request.
 
+Setup
 
-Tests included:
+Create the workflow file:
 
-Successful order placement reduces inventory
-POST /login
-email: provider@example.com
-password: password
- Order Creation Feature Test
+ What it does
 
-This project includes a feature test to verify that a Provider can successfully place an order and that inventory levels update correctly.
+- Uses PHP 8.2
+- Installs Composer dependencies
+- Sets up SQLite in-memory test database
+- Runs `php artisan test`
 
- Test Covered: `tests/Feature/OrderCreationTest.php`
+This ensures that the codebase stays stable and every commit is tested automatically.
 
-What the test asserts:
+name: Run Tests
 
-- A Provider (authenticated through their linked User account) can create an order.
-- The order is stored in the database.
-- Inventory quantity is reduced correctly.
-- The `OrderPlaced` event is dispatched.
-- The entire process is wrapped in a database transaction with `lockForUpdate()` to prevent race conditions.
+on:
+  push:
+  pull_request:
 
- Run the Test
+jobs:
+  tests:
+    runs-on: ubuntu-latest
 
-bash
-php artisan test --filter=OrderCreationTest
-This confirms:
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: hsl_labs_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
 
-Concurrency safety is enforced
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-Business logic in OrderService works correctly
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql
+          coverage: none
 
-HTTP API responds with 201 Created on success
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
 
 Ordering more than available stock triggers validation error
 ![alt text](image-5.png)
@@ -328,10 +268,9 @@ php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
 
-Further Reading
+      - name: Run migrations
+        run: php artisan migrate --no-interaction --force
 
-PLAN.md
- — concise project plan & milestones
+      - name: Run Tests
+        run: php artisan test
 
-ARCHITECTURE.md
- — high-level architecture diagram
